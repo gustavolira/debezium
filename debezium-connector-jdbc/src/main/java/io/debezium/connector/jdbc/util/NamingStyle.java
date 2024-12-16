@@ -1,6 +1,13 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.util;
 
 import java.util.stream.Stream;
+
+import io.debezium.DebeziumException;
 
 /**
  * Enum representing different naming styles for transforming string values.
@@ -32,9 +39,8 @@ public enum NamingStyle {
         return Stream.of(values())
                 .filter(style -> style.value.equalsIgnoreCase(value))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Invalid naming style: " + value + ". Allowed styles are: " + String.join(", ", valuesAsString())
-                ));
+                .orElseThrow(() -> new DebeziumException(
+                        "Invalid naming style: " + value + ". Allowed styles are: " + String.join(", ", valuesAsString())));
     }
 
     /**

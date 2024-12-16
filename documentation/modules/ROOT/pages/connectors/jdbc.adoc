@@ -937,7 +937,7 @@ By default, the connector uses the field name as the column name.
 
 * `snake_case` +
 * `camel_case` +
-* `upper_cae` +
+* `upper_case` +
 * `lower_case` +
 * `default` (no transformation). Optional.
 

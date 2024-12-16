@@ -1,8 +1,13 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.naming;
 
-import io.debezium.connector.jdbc.util.NamingStrategyBase;
-
 import java.util.Map;
+
+import io.debezium.connector.jdbc.util.AbstractNamingStrategy;
 
 /**
  * A custom implementation of the {@link io.debezium.sink.naming.ColumnNamingStrategy} interface
@@ -11,7 +16,7 @@ import java.util.Map;
  *
  * @author Gustavo Lira
  */
-public class CustomColumnNamingStrategy extends NamingStrategyBase implements ColumnNamingStrategy {
+public class CustomColumnNamingStrategy extends AbstractNamingStrategy implements ColumnNamingStrategy {
 
     private static final String PREFIX_KEY = "column.naming.prefix";
     private static final String SUFFIX_KEY = "column.naming.suffix";

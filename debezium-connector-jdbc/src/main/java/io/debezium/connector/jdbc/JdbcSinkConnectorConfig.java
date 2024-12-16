@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import io.debezium.connector.jdbc.naming.*;
-import io.debezium.sink.naming.DefaultCollectionNamingStrategy;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.connect.errors.ConnectException;
@@ -25,10 +23,16 @@ import io.debezium.config.Configuration;
 import io.debezium.config.EnumeratedValue;
 import io.debezium.config.Field;
 import io.debezium.config.Field.ValidationOutput;
+import io.debezium.connector.jdbc.naming.CollectionNamingStrategyFactory;
+import io.debezium.connector.jdbc.naming.ColumnNamingStrategy;
+import io.debezium.connector.jdbc.naming.ColumnNamingStrategyFactory;
+import io.debezium.connector.jdbc.naming.DefaultColumnNamingStrategy;
+import io.debezium.connector.jdbc.naming.TemporaryBackwardCompatibleCollectionNamingStrategyProxy;
 import io.debezium.sink.SinkConnectorConfig;
 import io.debezium.sink.filter.FieldFilterFactory;
 import io.debezium.sink.filter.FieldFilterFactory.FieldNameFilter;
 import io.debezium.sink.naming.CollectionNamingStrategy;
+import io.debezium.sink.naming.DefaultCollectionNamingStrategy;
 import io.debezium.util.Strings;
 
 /**
@@ -199,12 +203,14 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
             .withType(Type.STRING)
             .withWidth(ConfigDef.Width.MEDIUM)
             .withImportance(ConfigDef.Importance.LOW)
+            .withValidation(JdbcSinkConnectorConfig::validateColumnNamingStyle)
             .withDefault("default")
             .withDescription("The style of column naming: snake_case, camelCase, kebab-case, UPPERCASE, lowercase.");
 
     public static final Field COLUMN_NAMING_PREFIX_FIELD = Field.create(COLUMN_NAMING_PREFIX)
             .withDisplayName("Column Naming Prefix")
             .withType(Type.STRING)
+            .withDefault("")
             .withWidth(ConfigDef.Width.MEDIUM)
             .withImportance(ConfigDef.Importance.LOW)
             .withDescription("Optional prefix to add to column names.");
@@ -212,6 +218,7 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
     public static final Field COLUMN_NAMING_SUFFIX_FIELD = Field.create(COLUMN_NAMING_SUFFIX)
             .withDisplayName("Column Naming Suffix")
             .withType(Type.STRING)
+            .withDefault("")
             .withWidth(ConfigDef.Width.MEDIUM)
             .withImportance(ConfigDef.Importance.LOW)
             .withDescription("Optional suffix to add to column names.");
@@ -227,23 +234,7 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
                     "This field allows users to define a custom implementation for resolving collection names. " +
                     "If not specified, the default strategy is used.")
             .withDeprecatedAliases(DEPRECATED_TABLE_NAMING_STRATEGY)
-            .withValidation((config, field, problems) -> {
-                String value = config.getString(field);
-
-                if (DEPRECATED_TABLE_NAMING_STRATEGY.equals(value)) {
-                    problems.accept(field, value, "Warning: Using deprecated config option \"table.naming.strategy\".");
-                    return 0; // Validation ok
-                }
-
-                try {
-                    Class.forName(value);
-                } catch (ClassNotFoundException e) {
-                    problems.accept(field, value, "Invalid class specified for collection naming strategy.");
-                    return 1; // validation fail
-                }
-
-                return 0; // no problem
-            });
+            .withValidation(JdbcSinkConnectorConfig::validateCollectionNamingStrategy);
 
     public static final Field COLLECTION_NAMING_STYLE_FIELD = Field.create(COLLECTION_NAMING_STYLE)
             .withDisplayName("Column Naming Style")
@@ -505,20 +496,23 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
             throw new ConnectException("Cannot define both column.exclude.list and column.include.list. Please specify only one.");
         }
 
-        validateColumnNamingProperties();
     }
 
     public boolean validateAndRecord(Iterable<Field> fields, Consumer<String> problems) {
         return config.validateAndRecord(fields, problems);
     }
 
-    private void validateColumnNamingProperties() {
-        String namingStyle = config.getString(COLUMN_NAMING_STYLE_FIELD);
-        Set<String> validStyles = Set.of("snake_case", "camelCase", "kebab-case", "UPPERCASE", "lowercase", "default");
+    private static int validateColumnNamingStyle(Configuration config, Field field, ValidationOutput problems) {
+        String namingStyle = config.getString(field);
+        Set<String> validStyles = Set.of("snake_case", "camel_case", "kebab_case", "upper_case", "lower_case", "default");
+
         if (!validStyles.contains(namingStyle)) {
-            throw new ConnectException("Invalid column naming style: " + namingStyle +
+            problems.accept(field, namingStyle, "Invalid column naming style: " + namingStyle +
                     ". Valid options are: " + validStyles);
+            return 1; // Validation fail
         }
+
+        return 0; // Validation success
     }
 
     protected static ConfigDef configDef() {
@@ -656,5 +650,23 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
             }
         }
         return 0;
+    }
+
+    private static int validateCollectionNamingStrategy(Configuration config, Field field, ValidationOutput problems) {
+        String value = config.getString(field);
+
+        if (DEPRECATED_TABLE_NAMING_STRATEGY.equals(value)) {
+            problems.accept(field, value, "Warning: Using deprecated config option \"table.naming.strategy\".");
+            return 0; // Validation ok
+        }
+
+        try {
+            Class.forName(value);
+        } catch (ClassNotFoundException e) {
+            problems.accept(field, value, "Invalid class specified for collection naming strategy.");
+            return 1; // Validation fail
+        }
+
+        return 0; // No problem
     }
 }

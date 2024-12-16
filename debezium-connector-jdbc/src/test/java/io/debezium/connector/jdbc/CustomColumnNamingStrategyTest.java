@@ -1,14 +1,21 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import io.debezium.connector.jdbc.naming.CustomColumnNamingStrategy;
-import io.debezium.connector.jdbc.util.NamingStyle;
+import java.util.Map;
+
+import io.debezium.DebeziumException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import io.debezium.connector.jdbc.naming.CustomColumnNamingStrategy;
+import io.debezium.connector.jdbc.util.NamingStyle;
 
 /**
  * Tests for the {@link CustomColumnNamingStrategy} class.
@@ -62,8 +69,7 @@ public class CustomColumnNamingStrategyTest {
         CustomColumnNamingStrategy strategy = new CustomColumnNamingStrategy();
         strategy.configure(Map.of(
                 "column.naming.prefix", "pre_",
-                "column.naming.suffix", "_suf"
-        ));
+                "column.naming.suffix", "_suf"));
         assertThat(strategy.resolveColumnName("columnName")).isEqualTo("pre_columnName_suf");
     }
 
@@ -73,16 +79,13 @@ public class CustomColumnNamingStrategyTest {
         strategy.configure(Map.of(
                 "column.naming.style", NamingStyle.SNAKE_CASE.getValue(),
                 "column.naming.prefix", "pre_",
-                "column.naming.suffix", "_suf"
-        ));
+                "column.naming.suffix", "_suf"));
         assertThat(strategy.resolveColumnName("columnName")).isEqualTo("pre_column_name_suf");
     }
 
     @Test
     public void testInvalidNamingStyle() {
         CustomColumnNamingStrategy strategy = new CustomColumnNamingStrategy();
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                strategy.configure(Map.of("column.naming.style", "invalidStyle"))
-        );
+        Assertions.assertThrows(DebeziumException.class, () -> strategy.configure(Map.of("column.naming.style", "invalidStyle")));
     }
 }

@@ -1,6 +1,13 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.util;
 
 import java.util.Map;
+
+import io.debezium.DebeziumException;
 
 /**
  * Base class for naming strategies that provides common functionality for applying prefixes, suffixes,
@@ -10,7 +17,7 @@ import java.util.Map;
  *
  * @author Gustavo Lira
  */
-public abstract class NamingStrategyBase {
+public abstract class AbstractNamingStrategy {
 
     protected String prefix = "";
     protected String suffix = "";
@@ -25,15 +32,9 @@ public abstract class NamingStrategyBase {
      * @param styleKey the key used to retrieve the naming style property
      */
     public void configure(Map<String, String> properties, String prefixKey, String suffixKey, String styleKey) {
-        if (properties.containsKey(prefixKey)) {
-            this.prefix = properties.get(prefixKey);
-        }
-        if (properties.containsKey(suffixKey)) {
-            this.suffix = properties.get(suffixKey);
-        }
-        if (properties.containsKey(styleKey)) {
-            this.namingStyle = NamingStyle.from(properties.get(styleKey));
-        }
+        this.prefix = properties.getOrDefault(prefixKey, "");
+        this.suffix = properties.getOrDefault(suffixKey, "");
+        this.namingStyle = NamingStyle.from(properties.getOrDefault(styleKey, NamingStyle.DEFAULT.name()));
     }
 
     /**
@@ -44,7 +45,7 @@ public abstract class NamingStrategyBase {
      */
     public String applyNaming(String name) {
         if (name == null) {
-            throw new IllegalArgumentException("Name must not be null");
+            throw new DebeziumException("Name must not be null");
         }
         String transformedName = NamingStyleUtils.applyNamingStyle(name, namingStyle);
         return prefix + transformedName + suffix;

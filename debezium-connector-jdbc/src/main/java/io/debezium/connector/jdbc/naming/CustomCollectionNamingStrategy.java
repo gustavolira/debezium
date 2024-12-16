@@ -1,11 +1,16 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.naming;
+
+import java.util.Map;
 
 import io.debezium.connector.jdbc.util.NamingStyle;
 import io.debezium.connector.jdbc.util.NamingStyleUtils;
 import io.debezium.sink.DebeziumSinkRecord;
 import io.debezium.sink.naming.CollectionNamingStrategy;
-
-import java.util.Map;
 
 /**
  * Custom implementation of the {@link CollectionNamingStrategy}.
@@ -30,6 +35,6 @@ public class CustomCollectionNamingStrategy implements CollectionNamingStrategy 
     @Override
     public String resolveCollectionName(DebeziumSinkRecord record, String collectionFormat) {
         String transformedName = NamingStyleUtils.applyNamingStyle(collectionFormat, namingStyle);
-        return (prefix != null ? prefix : "") + transformedName + (suffix != null ? suffix : "");
+        return prefix + transformedName + suffix;
     }
 }

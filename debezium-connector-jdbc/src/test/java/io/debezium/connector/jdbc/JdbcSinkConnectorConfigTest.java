@@ -6,7 +6,8 @@
 package io.debezium.connector.jdbc;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,9 +16,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.debezium.connector.jdbc.naming.*;
-import io.debezium.sink.naming.CollectionNamingStrategy;
-import io.debezium.sink.naming.DefaultCollectionNamingStrategy;
 import org.hibernate.cfg.AvailableSettings;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -25,8 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.debezium.config.Field;
+import io.debezium.connector.jdbc.naming.ColumnNamingStrategy;
+import io.debezium.connector.jdbc.naming.CustomCollectionNamingStrategy;
+import io.debezium.connector.jdbc.naming.CustomColumnNamingStrategy;
+import io.debezium.connector.jdbc.naming.TemporaryBackwardCompatibleCollectionNamingStrategyProxy;
 import io.debezium.doc.FixFor;
 import io.debezium.sink.SinkConnectorConfig.PrimaryKeyMode;
+import io.debezium.sink.naming.CollectionNamingStrategy;
+import io.debezium.sink.naming.DefaultCollectionNamingStrategy;
 
 /**
  * Unit tests for the {@link JdbcSinkConnectorConfig} class.
@@ -169,8 +173,7 @@ public class JdbcSinkConnectorConfigTest {
     public void testDeprecatedTableNamingStrategy() {
         var properties = Map.of(
                 JdbcSinkConnectorConfig.DEPRECATED_TABLE_NAMING_STRATEGY, "table.naming.strategy",
-                JdbcSinkConnectorConfig.COLLECTION_NAMING_STRATEGY, JdbcSinkConnectorConfig.DEPRECATED_TABLE_NAMING_STRATEGY
-        );
+                JdbcSinkConnectorConfig.COLLECTION_NAMING_STRATEGY, JdbcSinkConnectorConfig.DEPRECATED_TABLE_NAMING_STRATEGY);
 
         final JdbcSinkConnectorConfig config = new JdbcSinkConnectorConfig(properties);
 
@@ -181,16 +184,14 @@ public class JdbcSinkConnectorConfigTest {
         assertTrue(isValid, "Validation should pass.");
         assertEquals(
                 "The 'collection.naming.strategy' value 'table.naming.strategy' is invalid: Warning: Using deprecated config option \"table.naming.strategy\".",
-                errorMessage.get()
-        );
+                errorMessage.get());
     }
 
     @Test
     public void testProxyWithDeprecatedTableNamingStrategy() {
         Map<String, String> props = Map.of(
                 JdbcSinkConnectorConfig.DEPRECATED_TABLE_NAMING_STRATEGY, "deprecated_table_strategy",
-                JdbcSinkConnectorConfig.COLLECTION_NAMING_STRATEGY, DefaultCollectionNamingStrategy.class.getName()
-        );
+                JdbcSinkConnectorConfig.COLLECTION_NAMING_STRATEGY, DefaultCollectionNamingStrategy.class.getName());
 
         JdbcSinkConnectorConfig config = new JdbcSinkConnectorConfig(props);
 

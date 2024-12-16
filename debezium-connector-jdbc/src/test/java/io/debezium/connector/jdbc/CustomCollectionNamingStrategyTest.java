@@ -1,16 +1,23 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Map;
+
+import io.debezium.DebeziumException;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import io.debezium.connector.jdbc.naming.CustomCollectionNamingStrategy;
 import io.debezium.connector.jdbc.util.DebeziumSinkRecordFactory;
 import io.debezium.connector.jdbc.util.NamingStyle;
 import io.debezium.sink.DebeziumSinkRecord;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 /**
  * Tests for the {@link CustomCollectionNamingStrategy} class.
@@ -78,8 +85,7 @@ public class CustomCollectionNamingStrategyTest {
         CustomCollectionNamingStrategy strategy = new CustomCollectionNamingStrategy();
         strategy.configure(Map.of(
                 "collection.naming.prefix", "pre_",
-                "collection.naming.suffix", "_suf"
-        ));
+                "collection.naming.suffix", "_suf"));
         DebeziumSinkRecord record = RECORD_FACTORY.createRecord("database.schema.table");
 
         assertEquals("pre_database.schema.table_suf",
@@ -92,8 +98,7 @@ public class CustomCollectionNamingStrategyTest {
         strategy.configure(Map.of(
                 "collection.naming.style", NamingStyle.SNAKE_CASE.getValue(),
                 "collection.naming.prefix", "pre_",
-                "collection.naming.suffix", "_suf"
-        ));
+                "collection.naming.suffix", "_suf"));
         DebeziumSinkRecord record = RECORD_FACTORY.createRecord("database.schema.table");
 
         assertEquals("pre_database_schema_table_suf",
@@ -103,7 +108,6 @@ public class CustomCollectionNamingStrategyTest {
     @Test
     public void testInvalidNamingStyle() {
         CustomCollectionNamingStrategy strategy = new CustomCollectionNamingStrategy();
-        assertThrows(IllegalArgumentException.class, () ->
-                strategy.configure(Map.of("collection.naming.style", "invalidStyle")));
+        assertThrows(DebeziumException.class, () -> strategy.configure(Map.of("collection.naming.style", "invalidStyle")));
     }
 }

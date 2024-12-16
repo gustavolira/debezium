@@ -1,13 +1,19 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.naming;
 
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.debezium.config.Configuration;
 import io.debezium.connector.jdbc.JdbcSinkConnectorConfig;
 import io.debezium.sink.naming.CollectionNamingStrategy;
 import io.debezium.sink.naming.DefaultCollectionNamingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Factory for creating instances of CollectionNamingStrategy.
@@ -57,11 +63,11 @@ public class CollectionNamingStrategyFactory {
 
             CollectionNamingStrategy strategy = config.getInstance(
                     JdbcSinkConnectorConfig.COLLECTION_NAMING_STRATEGY_FIELD,
-                    CollectionNamingStrategy.class
-            );
+                    CollectionNamingStrategy.class);
             strategy.configure(props);
             return strategy;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.error("Failed to create CollectionNamingStrategy for class '{}': {}", strategyClassName, e.getMessage(), e);
             throw new IllegalArgumentException("Failed to create CollectionNamingStrategy for class: " + strategyClassName, e);
         }

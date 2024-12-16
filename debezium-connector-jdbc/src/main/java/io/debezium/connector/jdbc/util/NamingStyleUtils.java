@@ -1,8 +1,14 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.connector.jdbc.util;
 
-import io.debezium.util.Strings;
-
 import java.util.Locale;
+
+import io.debezium.DebeziumException;
+import io.debezium.util.Strings;
 
 /**
  * Utility class for applying various naming styles (e.g., snake_case, camelCase, UPPER_CASE, LOWER_CASE)
@@ -28,7 +34,7 @@ public class NamingStyleUtils {
      */
     public static String applyNamingStyle(String name, NamingStyle style) {
         if (name == null || style == null) {
-            throw new IllegalArgumentException("Name and style must not be null");
+            throw new DebeziumException("Name and style must not be null");
         }
 
         return switch (style) {
