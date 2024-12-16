@@ -237,7 +237,6 @@ public class JdbcSinkConnectorConfigTest {
         assertThat(resolvedName).isEqualTo("tbl_test_collection_table");
     }
 
-
     // @Test
     // public void testNonDefaultSchemaEvolutionProperty() {
     // final Map<String, String> properties = new HashMap<>();

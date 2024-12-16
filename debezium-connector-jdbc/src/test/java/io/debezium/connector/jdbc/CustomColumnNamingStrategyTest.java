@@ -9,11 +9,11 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.Map;
 
-import io.debezium.DebeziumException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import io.debezium.DebeziumException;
 import io.debezium.connector.jdbc.naming.CustomColumnNamingStrategy;
 import io.debezium.connector.jdbc.util.NamingStyle;
 

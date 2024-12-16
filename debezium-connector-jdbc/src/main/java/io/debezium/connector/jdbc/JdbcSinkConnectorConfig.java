@@ -662,7 +662,8 @@ public class JdbcSinkConnectorConfig implements SinkConnectorConfig {
 
         try {
             Class.forName(value);
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             problems.accept(field, value, "Invalid class specified for collection naming strategy.");
             return 1; // Validation fail
         }

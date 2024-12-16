@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
-import io.debezium.DebeziumException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import io.debezium.DebeziumException;
 import io.debezium.connector.jdbc.naming.CustomCollectionNamingStrategy;
 import io.debezium.connector.jdbc.util.DebeziumSinkRecordFactory;
 import io.debezium.connector.jdbc.util.NamingStyle;
